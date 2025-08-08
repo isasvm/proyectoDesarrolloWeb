@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Palacio de las Joyas</title>
+  <script src="./chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f4f0;
+      color: #333;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #c09f6f;
+      margin-bottom: 10px;
+    }
+
+    p.bienvenida {
+      text-align: center;
+      font-size: 1.2em;
+      margin-bottom: 30px;
+    }
+
+    .contenedor {
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .datos {
+      min-width: 200px;
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .datos h2 {
+      color: #c09f6f;
+    }
+
+    .grafico {
+      flex: 1;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .social {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 1.1em;
+    }
+
+    .social a {
+      display: inline-block;
+      background-color: #c09f6f;
+      color: white;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .social a:hover {
+      background-color: #a88455;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Palacio de las Joyas</h1>
+  <p class="bienvenida">✨ Bienvenidos a nuestro mundo de joyas únicas y exclusivas, hechas con amor y dedicación. ✨</p>
+
+  <div class="contenedor">
+    <div class="datos">
+      <h2>Última lectura</h2>
+      <p><strong>Valor analógico:</strong> <span id="valor">-</span></p>
+      <p><strong>Estado:</strong> <span id="estado">-</span></p>
+      <p><strong>Hora:</strong> <span id="hora">-</span></p>
+    </div>
+
+    <div class="grafico">
+      <canvas id="grafico"></canvas>
+    </div>
+  </div>
+
+  <div class="social">
+    <a href="https://instagram.com/tu_usuario" target="_blank">📷 Instagram</a>
+    <a href="https://wa.me/xxxxxxxxxx" target="_blank">📱 WhatsApp: xxxx-xxxx</a>
+  </div>
+
+  <script>
+    async function cargarDatos() {
+      try {
+        const resp = await fetch("http://[::1]:5000/api/historial"); // Ajusta la URL de tu API
+        const datos = await resp.json();
+        const ult = datos.datos[datos.datos.length - 1];
+
+        if (ult) {
+          document.getElementById("valor").textContent = ult.valor;
+          document.getElementById("estado").textContent = ult.estado;
+          document.getElementById("hora").textContent = new Date(ult.fecha).toLocaleTimeString();
+        }
+
+        // Crear gráfico
+        const ctx = document.getElementById('grafico').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: datos.datos.map(d => new Date(d.fecha).toLocaleTimeString()),
+            datasets: [{
+              label: 'Valor analógico',
+              data: datos.datos.map(d => d.valor),
+              borderColor: '#c09f6f',
+              backgroundColor: 'rgba(192,159,111,0.2)',
+              fill: true,
+              tension: 0.3
+            }]
+          }
+        });
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+      }
+    }
+    cargarDatos();
+  </script>
+
+</body>
+</html>
